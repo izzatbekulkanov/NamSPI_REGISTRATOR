@@ -1,0 +1,105 @@
+{% extends 'members/staff_managment.html' %}
+{% load static %}
+
+{% block title %}Hodimlar ro'yxati{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10 py-4 border-end shadow-sm min-vh-100 rounded-end">
+    <div class="container py-4">
+        <h4 class="fw-semibold text-center mb-4">Hodimlar ro‘yxati</h4>
+
+        <form method="GET" class="mb-3 d-flex justify-content-end">
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control form-control-sm w-25"
+                   placeholder="Qidiruv...">
+            <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">Izlash</button>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light text-center">
+                <tr>
+                    <th>#</th>
+                    <th>F.I.Sh.</th>
+                    <th>Username</th>
+                    <th>Darajasi</th>
+                    <th>Bugun</th>
+                    <th>Umumiy</th>
+                    <th>Roli</th>
+                    <th>Amallar</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                <tr class="text-center">
+                    <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                    <td class="text-start">{{ user.full_name }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        {% with user.operatorprofile as p %}
+                            {% if p.level == "VIP" %}<span class="badge bg-dark text-white">👑 VIP</span>{% endif %}
+                            {% if p.level == "Usta" %}<span class="badge bg-danger text-white">🔥 Usta</span>{% endif %}
+                            {% if p.level == "Yaxshi" %}<span class="badge bg-warning text-dark">🌟 Yaxshi</span>{% endif %}
+                            {% if p.level == "Oddiy" %}<span class="badge bg-primary">⭐ Oddiy</span>{% endif %}
+                            {% if p.level == "Boshlovchi" or not p.level %}<span class="badge bg-success">🟢 Boshlovchi</span>{% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>{{ user.today_count }}</td>
+                    <td>{{ user.total_count }}</td>
+                    <td>
+                        {% if user.is_superuser %}<span class="badge bg-danger">Admin</span>
+                        {% elif user.is_leader %}<span class="badge bg-info text-dark">Rahbar</span>
+                        {% elif user.is_operator %}<span class="badge bg-primary">Operator</span>
+                        {% else %}<span class="badge bg-secondary">Noma'lum</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'reset-password' user.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-warning">Parolni tiklash</button>
+                        </form>
+                        <form method="POST" action="{% url 'delete-staff' user.id %}" class="d-inline ms-1"
+                              onsubmit="return confirm('Rostdan ham o‘chirmoqchimisiz?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">O‘chirish</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-muted text-center">Hodimlar topilmadi</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3">
+            {% if is_paginated %}
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ request.GET.q }}&page=1">&laquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">&lsaquo;</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item disabled">
+                        <span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">&rsaquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "queueing/queueing_base.html" %}
+{% load static %}
+
+{% block title %}{{ section.name }} xizmatlari{% endblock %}
+
+{% block content %}
+<style>
+    .section-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 2rem;
+        text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        height: 100%;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<div class="container py-5">
+    <div class="mb-4">
+        <a href="{% url 'queueing-section-list' %}" class="btn back-btn btn-sm">
+            <i class="bi bi-arrow-left"></i> Ortga qaytish
+        </a>
+    </div>
+
+    <h2 class="text-center section-title">{{ section.name }} xizmatlari</h2>
+
+    {% if subservices %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for service in subservices %}
+        <div class="col">
+            <div class="glass-card text-center">
+                <h5>{{ service.name }}</h5>
+                <p>{{ service.description|default:"" }}</p>
+                <button class="btn btn-outline-light btn-sm play-sound" onclick="getTicket({{ service.id }})">Navbat
+                    olish
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light text-center mt-4 text-dark bg-opacity-75">
+        Bu bo‘limda hozircha hech qanday xizmat mavjud emas.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Hidden iframe for auto-print -->
+<!-- IFRAME for silent printing -->
+<iframe id="printFrame" style="display: none;"></iframe>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<audio id="click-sound" src="{% static 'sound/click.wav' %}" preload="auto"></audio>
+
+<script>
+    const clickSound = document.getElementById("click-sound");
+
+    function getTicket(serviceId) {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {
+        });
+
+        fetch(`/ticket/create/${serviceId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Navbat olindi',
+                        html: `<strong>${data.ticket_number}</strong> raqamli chipta chop etilmoqda...`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    setTimeout(() => {
+                        printTicket(data);
+                        setTimeout(() => {
+                            window.location.href = "{% url 'queueing-section-list' %}";
+                        }, 3000);
+                    }, 1000);
+                }
+            });
+    }
+
+    function printTicket(data) {
+        const now = new Date();
+        const time = now.toLocaleTimeString('uz-UZ');
+        const date = now.toLocaleDateString('uz-UZ');
+
+        const html = `
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: monospace;
+            font-size: 12px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+          }
+          .line {
+            margin: 3px 0;
+            font-size: 12px;
+          }
+          .logo {
+            width: 50px;
+            height: auto;
+            margin-top: 2px;
+          }
+          .title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 2px 0;
+          }
+          .web {
+            font-size: 11px;
+            margin: 0 0 3px 0;
+          }
+          .ticket {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0px 0;
+          }
+          .datetime {
+            font-size: 11px;
+            margin-top: 2px;
+          }
+        </style>
+      </head>
+      <body onload="window.print()">
+        <div class="line">────────────</div>
+        <img class="logo" src="${window.location.origin}{% static 'img/logo.png' %}" alt="logo"><br>
+        <div class="title">NamDPI | RTTM</div>
+        <div class="web">www.namspi.uz</div>
+        <div class="ticket">${data.ticket_number}</div>
+        <div class="datetime">${time} ${date}</div>
+        <div class="line">────────────</div>
+      </body>
+    </html>
+  `;
+
+        const printFrame = document.getElementById('printFrame');
+        const frameWindow = printFrame.contentWindow || printFrame;
+        frameWindow.document.open();
+        frameWindow.document.write(html);
+        frameWindow.document.close();
+    }
+</script>
+{% endblock %}

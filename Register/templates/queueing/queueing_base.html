@@ -1,0 +1,200 @@
+{% load static django_bootstrap5 django_browser_reload %}
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Navbat{% endblock %}</title>
+  <link rel="icon" type="image/x-icon" href="{% static 'img/queue.ico' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  {% bootstrap_css %}
+  {% django_browser_reload_script %}
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .video-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .overlay {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(6px);
+      background-color: rgba(0, 0, 50, 0.25);
+    }
+
+    main {
+      flex: 1;
+      padding-bottom: 20px;
+    }
+
+    footer {
+      background-color: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(4px);
+      color: white;
+      text-align: center;
+      font-size: 0.875rem;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .code-box {
+      width: 48px;
+      height: 48px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      line-height: 48px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    .code-box.active {
+      outline: 2px solid #0d6efd;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 🎥 Orqa video -->
+<video class="video-bg" autoplay muted loop playsinline>
+  <source src="{% static 'video/web.webm' %}" type="video/webm">
+</video>
+
+<!-- 🔝 Header -->
+<header class="py-3 border-bottom bg-transparent">
+  <div class="container d-flex justify-content-center align-items-center gap-3">
+    <img src="{% static 'img/logo.png' %}" alt="Logo" width="48" height="48" class="img-fluid" />
+    <h4 class="fw-bold text-white mb-0">NamDPI - REGISTRATOR OFFICE</h4>
+  </div>
+</header>
+
+<!-- 🌐 Kontent qismi -->
+<div class="overlay">
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- 🔚 Doimiy pastki qism -->
+  <footer>
+    &copy; 2025 Namangan DPI — Registrator | Dasturchi: Izzatbek Ulkanov | NamDPI RTTM jamoasi
+  </footer>
+</div>
+
+<!-- 🔐 Maxfiy modal -->
+<div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content bg-white bg-opacity-25 backdrop-blur border-0 text-white rounded-4 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-semibold">Maxfiy kirish</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="d-flex justify-content-center gap-2 mb-3">
+          {% for i in "0123" %}
+            <div class="code-box" id="digit-{{ i }}">_</div>
+          {% endfor %}
+        </div>
+        <input type="text"
+               id="secretInput"
+               maxlength="4"
+               inputmode="numeric"
+               pattern="\d*"
+               autocomplete="off"
+               class="position-absolute opacity-0"
+               style="left:-9999px;" />
+        <div class="text-center">
+          <small class="text-danger d-none" id="wrongPassword">Parol noto‘g‘ri!</small>
+        </div>
+      </div>
+      <div class="modal-footer border-0 justify-content-between">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bekor qilish</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="verifySecret()">Tasdiqlash</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const modalElement = document.getElementById('adminLoginModal');
+  const secretInput = document.getElementById("secretInput");
+  const digitBoxes = [
+    document.getElementById("digit-0"),
+    document.getElementById("digit-1"),
+    document.getElementById("digit-2"),
+    document.getElementById("digit-3"),
+  ];
+  const wrongPassword = document.getElementById("wrongPassword");
+  const modal = new bootstrap.Modal(modalElement);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey && e.key.toLowerCase() === "i") {
+      e.preventDefault();
+      openAdminModal();
+    }
+  });
+
+  modalElement.addEventListener("shown.bs.modal", () => {
+    setTimeout(() => secretInput.focus(), 100);
+    updateDigitBoxes("");
+  });
+
+  secretInput.addEventListener("input", function () {
+    const digits = this.value.replace(/\D/g, "").slice(0, 4);
+    this.value = digits;
+    updateDigitBoxes(digits);
+    if (digits.length === 4) setTimeout(() => verifySecret(digits), 200);
+  });
+
+  function updateDigitBoxes(digits) {
+    for (let i = 0; i < 4; i++) {
+      digitBoxes[i].textContent = digits[i] ? "•" : "_";
+      digitBoxes[i].classList.toggle("active", i === digits.length);
+    }
+  }
+
+  function verifySecret(digits) {
+    if (digits === "1231") {
+      window.location.href = "{% url 'login' %}";
+    } else {
+      wrongPassword.classList.remove("d-none");
+      secretInput.value = "";
+      updateDigitBoxes("");
+      secretInput.focus();
+    }
+  }
+
+  function openAdminModal() {
+    wrongPassword.classList.add("d-none");
+    secretInput.value = "";
+    updateDigitBoxes("");
+    modal.show();
+  }
+</script>
+
+{% block script %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,125 @@
+{% extends "queueing/queueing_base.html" %}
+{% load static %}
+
+{% block title %}Kirish sahifasi{% endblock %}
+
+{% block content %}
+<!-- Particle.js background -->
+<div id="particles-js" class="position-fixed top-0 start-0 w-100 h-100 z-n1"></div>
+
+<!-- Login container -->
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow-lg border-0 p-4 bg-white bg-opacity-75 backdrop-blur rounded-4" style="width: 100%; max-width: 400px;">
+
+    <!-- Logo -->
+    <div class="text-center mb-3">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" width="72" height="72" class="img-fluid">
+    </div>
+
+    <h4 class="mb-4 text-center fw-semibold text-primary">Registrator tizimiga kirish</h4>
+
+    <form method="POST" novalidate>
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="username" class="form-label">Foydalanuvchi nomi</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input type="text" class="form-control" name="username" id="username" placeholder="Username" required>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label for="password" class="form-label">Parol</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input type="password" class="form-control" name="password" id="password" placeholder="Parol" required>
+          <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()" tabindex="-1">
+            <i id="eye-icon" class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      {% if form.errors %}
+      <div class="alert alert-danger mt-3 py-2 text-center" role="alert">
+        Login yoki parol noto‘g‘ri!
+      </div>
+      {% endif %}
+
+      <!-- Submit -->
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-primary">Kirish</button>
+      </div>
+    </form>
+
+    <!-- Ro'yxatdan o‘tish -->
+    <div class="text-center mt-4">
+      <small class="text-muted">Ortga qaytish
+        <a href="/" class="text-decoration-none text-primary fw-medium">Bu yerni bosing</a>
+      </small>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- Particle.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+<!-- Password toggle -->
+<script>
+  function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.getElementById("eye-icon");
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+    } else {
+      passwordInput.type = "password";
+      icon.classList.remove("bi-eye-slash");
+      icon.classList.add("bi-eye");
+    }
+  }
+</script>
+
+<!-- Particle.js init -->
+<script>
+particlesJS("particles-js", {
+  "particles": {
+    "number": { "value": 50, "density": { "enable": true, "value_area": 800 } },
+    "color": { "value": "#4a90e2" },
+    "shape": { "type": "circle" },
+    "opacity": { "value": 0.5 },
+    "size": { "value": 3, "random": true },
+    "line_linked": {
+      "enable": true,
+      "distance": 120,
+      "color": "#cccccc",
+      "opacity": 0.4,
+      "width": 1
+    },
+    "move": {
+      "enable": true,
+      "speed": 1,
+      "direction": "none",
+      "out_mode": "out"
+    }
+  },
+  "interactivity": {
+    "events": {
+      "onhover": { "enable": true, "mode": "repulse" },
+      "onclick": { "enable": true, "mode": "push" }
+    },
+    "modes": {
+      "repulse": { "distance": 80 },
+      "push": { "particles_nb": 4 }
+    }
+  },
+  "retina_detect": true
+});
+</script>
+{% endblock %}

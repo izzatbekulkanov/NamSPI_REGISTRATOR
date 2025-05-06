@@ -1,0 +1,129 @@
+{% extends 'members/staff_managment.html' %}
+{% load static %}
+
+{% block title %}Xizmatlarni biriktirish{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10 py-4 border-end shadow-sm min-vh-100 rounded-end">
+  <div class="container">
+    <h4 class="fw-semibold text-center mb-4">Foydalanuvchilarga xizmatlarni biriktirish</h4>
+
+    <!-- Tanlash formasi -->
+    <form method="get" class="row g-3 align-items-end mb-4">
+      <div class="col-md-6">
+        <label class="form-label">Foydalanuvchi</label>
+        <select name="user_id" class="form-select" onchange="this.form.submit()">
+          <option value="">Tanlang</option>
+          {% for user in users %}
+          <option value="{{ user.id }}" {% if selected_user and user.id == selected_user.id %}selected{% endif %}>{{ user.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+
+    {% if selected_user %}
+    <form method="POST" id="assignForm">
+      {% csrf_token %}
+      <input type="hidden" name="user" value="{{ selected_user.id }}">
+
+      <div class="mb-3">
+        <label class="form-label">Xizmat bo‘limi orqali filtr</label>
+        <select class="form-select" id="sectionFilter">
+          <option value="">-- Barchasi --</option>
+          {% for sec in sections %}
+          <option value="section-{{ sec.id }}">{{ sec.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" id="subserviceList">
+        {% for ss in available_subservices %}
+        <div class="col subservice-item section-{{ ss.section.id }}">
+          <div class="form-check border rounded p-3 h-100">
+            <input class="form-check-input d-none" type="checkbox" name="subservices" value="{{ ss.id }}" id="sub-{{ ss.id }}">
+            <label class="form-check-label w-100 d-block p-2 border rounded" for="sub-{{ ss.id }}">
+              <strong>{{ ss.name }}</strong><br>
+              <small class="text-muted">({{ ss.section.name }})</small>
+            </label>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Biriktirilmagan xizmatlar mavjud emas.</p>
+        {% endfor %}
+      </div>
+
+      <div class="mt-4 text-end">
+        <button type="submit" class="btn btn-primary">Biriktirish</button>
+      </div>
+    </form>
+
+    <hr class="my-4">
+    <h5 class="mb-3">Biriktirilgan xizmatlar</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Xizmat</th>
+            <th>Bo‘lim</th>
+            <th>Amal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assignments %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ a.service.name }}</td>
+            <td>{{ a.service.section.name }}</td>
+            <td>
+              <form method="POST" action="{% url 'unassign-subservice' a.id %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="user" value="{{ selected_user.id }}">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Olib tashlashni xohlaysizmi?')">Olib tashlash</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted">Hozircha hech qanday biriktirish mavjud emas</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.querySelectorAll(".form-check-input").forEach(input => {
+    input.addEventListener("change", function() {
+      const label = input.nextElementSibling;
+      label.classList.toggle("border-success", input.checked);
+    });
+  });
+
+  document.getElementById("sectionFilter").addEventListener("change", function () {
+    const selected = this.value;
+    document.querySelectorAll(".subservice-item").forEach(item => {
+      if (!selected || item.classList.contains(selected)) {
+        item.classList.remove("d-none");
+      } else {
+        item.classList.add("d-none");
+      }
+    });
+  });
+
+  {% if messages %}
+  {% for message in messages %}
+    Swal.fire({
+      icon: "success",
+      title: "{{ message|escapejs }}",
+      timer: 2000,
+      showConfirmButton: false
+    });
+  {% endfor %}
+  {% endif %}
+</script>
+{% endblock %}

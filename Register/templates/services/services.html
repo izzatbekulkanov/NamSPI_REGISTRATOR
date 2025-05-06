@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h1 class="text-center mb-4 fs-4 fw-semibold text-primary">Xizmatlar Boshqaruvi</h1>
+
+<!-- Tabs navigatsiyasi -->
+<ul class="nav nav-tabs mb-4" id="serviceTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link {% if active_tab == 'section' %}active{% endif %}" id="section-tab" data-bs-toggle="tab" data-bs-target="#section" type="button" role="tab">Bo‘limlar</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link {% if active_tab == 'subservice' %}active{% endif %}" id="subservice-tab" data-bs-toggle="tab" data-bs-target="#subservice" type="button" role="tab">Xizmatlar</button>
+  </li>
+</ul>
+
+<!-- Tabs tarkibi -->
+<div class="tab-content" id="serviceTabContent">
+  <!-- Bo‘limlar -->
+  <div class="tab-pane fade {% if active_tab == 'section' %}show active{% endif %}" id="section" role="tabpanel" aria-labelledby="section-tab">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <form method="POST" class="vstack gap-2 mb-4">
+          {% csrf_token %}
+          <input type="hidden" name="active_tab" value="section">
+          <input type="text" name="name" class="form-control" placeholder="Bo‘lim nomi" required>
+          <textarea name="description" class="form-control" rows="2" placeholder="Izoh (ixtiyoriy)"></textarea>
+          <button name="section_submit" type="submit" class="btn btn-primary">Qo‘shish</button>
+        </form>
+
+        {% if sections %}
+        <table class="table table-bordered table-sm">
+          <thead class="table-light">
+            <tr><th>#</th><th>Bo‘lim nomi</th><th>Amal</th></tr>
+          </thead>
+          <tbody>
+            {% for s in sections %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ s.name }}</td>
+              <td>
+                <form method="post" action="{% url 'delete-section' s.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="active_tab" value="section">
+                  <button type="submit" class="btn btn-sm btn-danger">O‘chirish</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Bo‘limlar mavjud emas</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Xizmatlar -->
+  <div class="tab-pane fade {% if active_tab == 'subservice' %}show active{% endif %}" id="subservice" role="tabpanel" aria-labelledby="subservice-tab">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <form method="POST" class="vstack gap-2 mb-4">
+          {% csrf_token %}
+          <input type="hidden" name="active_tab" value="subservice">
+          <select name="section" class="form-select" required>
+            <option value="" disabled selected>Bo‘limni tanlang</option>
+            {% for s in sections %}
+            <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="text" name="name" class="form-control" placeholder="Xizmat nomi" required>
+          <textarea name="description" class="form-control" rows="2" placeholder="Izoh (ixtiyoriy)"></textarea>
+
+          <button name="subservice_submit" type="submit" class="btn btn-primary">Qo‘shish</button>
+        </form>
+
+        {% if subservices %}
+        <table class="table table-bordered table-sm">
+          <thead class="table-light">
+            <tr><th>#</th><th>Xizmat nomi</th><th>Bo‘lim</th><th>Amal</th></tr>
+          </thead>
+          <tbody>
+            {% for ss in subservices %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ ss.name }}</td>
+              <td>{{ ss.section.name }}</td>
+              <td>
+                <form method="post" action="{% url 'delete-subservice' ss.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="active_tab" value="subservice">
+                  <button type="submit" class="btn btn-sm btn-danger">O‘chirish</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Xizmatlar mavjud emas</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+{% if messages %}
+  {% for message in messages %}
+    Swal.fire({
+      icon: 'success',
+      title: '{{ message|escapejs }}',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  {% endfor %}
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NamDPI | Xizmat ko‘rsatilayotgan chiptalar</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<!-- Video fon -->
+<video autoplay muted loop id="bg-video">
+    <source src="assets/video/web.webm" type="video/webm" />
+</video>
+
+<!-- HEADER -->
+<header class="header glass">
+    <img src="assets/img/logo.png" class="logo" alt="NamDPI Logo" />
+    <div class="header-title">Xizmat ko‘rsatilayotgan chiptalar</div>
+    <div class="theme-toggle">
+        <button id="themeToggle" title="Rejimni o‘zgartirish" aria-label="Rejimni o‘zgartirish">🌙</button>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+    <!-- CHAP PANEL -->
+    <section class="left-panel">
+        <table class="ticket-table">
+            <thead>
+            <tr>
+                <th>Navbat</th>
+                <th>Oyna</th>
+            </tr>
+            </thead>
+            <tbody id="ticket-body">
+            <!-- JS orqali to‘ldiriladi -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- O‘NG SECTION -->
+    <div class="right-section">
+        <div class="right-video">
+            <video autoplay muted loop>
+                <source src="assets/video/intro.webm" type="video/webm" />
+            </video>
+            <!-- E’lon oynasi -->
+            <div class="announcement glass" id="announcement">
+                <span id="announcement-text"></span>
+            </div>
+        </div>
+        <!-- Promo ma'lumot -->
+        <div class="promo-info glass">Namangan Davlat Pedagogika Instituti | RTTM</div>
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer glass">
+    © 2025 Namangan Davlat Pedagogika Instituti — RTTM
+</footer>
+
+<!-- SCRIPT -->
+<script src="script.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>

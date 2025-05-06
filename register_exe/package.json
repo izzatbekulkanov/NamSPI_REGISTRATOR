@@ -1,0 +1,44 @@
+{
+  "name": "namdpi-queue-app",
+  "version": "1.0.0",
+  "description": "NamDPI navbat olish terminali",
+  "main": "main.js",
+  "author": "Izzatbek Ulkanov",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "uz.namdpi.queue",
+    "productName": "NamDPI Navbat Paneli",
+    "copyright": "© 2025 NamDPI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "extraResources": [
+      "assets/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/queue.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NamDPI Navbat Paneli"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^24.12.0"
+  }
+}

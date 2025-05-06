@@ -1,0 +1,65 @@
+{% load static %}
+{% if waiting_tickets %}
+<div class="table-responsive scroll-box">
+    <table class="table table-sm table-hover align-middle">
+        <thead>
+        <tr>
+            <th>Chipta</th>
+            <th>Xizmat</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="waiting-tickets-tbody">
+        {% for ticket in waiting_tickets %}
+        <tr>
+            <td><strong class="text-success">{{ ticket.ticket_number }}</strong></td>
+            <td>{{ ticket.service.name }}</td>
+            <td>
+                <form method="POST" action="{% url 'serve-ticket' ticket.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-primary">Qabul</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-muted text-center">Navbatlar mavjud emas.</p>
+{% endif %}
+
+<!-- ✅ Realtime navbatni yangilash -->
+<script>
+    function refreshWaitingTicketsOnly() {
+        fetch("{% url 'ajax-waiting-tickets' %}")
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById("waiting-tickets-box");
+                if (container) {
+                    container.innerHTML = data.html;
+                }
+            });
+    }
+
+    setInterval(refreshWaitingTicketsOnly, 3000); // har 3 sekundda yangilanadi
+    document.addEventListener("DOMContentLoaded", refreshWaitingTicketsOnly);
+</script>
+
+<!-- ✅ Swal bildirishnomalari -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        {% endfor %}
+    {% endif %}
+</script>

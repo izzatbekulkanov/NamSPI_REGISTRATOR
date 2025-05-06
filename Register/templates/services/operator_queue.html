@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Operator Navbati{% endblock %}
+
+{% block content %}
+<style>
+  .table-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    padding: 1.5rem;
+    height: 100%;
+  }
+  .scroll-box { max-height: 400px; overflow-y: auto; }
+  .scroll-box::-webkit-scrollbar { width: 6px; }
+  .scroll-box::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 4px; }
+  .section-title { font-weight: 700; font-size: 1.3rem; color: #0d6efd; margin-bottom: 1rem; }
+  .timer-display { font-size: 1.4rem; font-weight: 700; color: #198754; }
+  .badge-result { padding: 0.25em 0.65em; border-radius: 0.4rem; font-size: 0.75rem; }
+  .badge-completed { background-color: #d4edda; color: #155724; }
+  .badge-rejected { background-color: #f8d7da; color: #721c24; }
+</style>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="table-card d-flex flex-column">
+        <div class="section-title">Kutayotganlar</div>
+        <div id="waiting-tickets-box">
+          {% include 'services/_waiting_tickets.html' %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="table-card">
+        <div class="section-title">Xizmat ko‘rsatilmoqda</div>
+        <div id="serving-ticket-box">
+          {% include 'services/_serving_ticket.html' %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="table-card d-flex flex-column">
+        <div class="section-title">Yakunlanganlar</div>
+        <div id="done-tickets-box">
+          {% include 'services/_done_tickets.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function refreshQueues() {
+  fetch("{% url 'ajax-waiting-tickets' %}").then(r => r.json()).then(data => {
+    document.getElementById("waiting-tickets-box").innerHTML = data.html;
+  });
+  fetch("{% url 'ajax-serving-ticket' %}").then(r => r.json()).then(data => {
+    document.getElementById("serving-ticket-box").innerHTML = data.html;
+    const timerStart = document.getElementById("timer-start-time");
+    if (timerStart) startLiveTimer(timerStart.value);
+  });
+  fetch("{% url 'ajax-done-tickets' %}").then(r => r.json()).then(data => {
+    document.getElementById("done-tickets-box").innerHTML = data.html;
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,294 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Helvetica Neue', Arial, sans-serif;
+    color: #ffffff;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e1e2f 0%, #2a2a40 100%);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Video orqa fon */
+#bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.3;
+    filter: blur(2px);
+}
+
+/* macOS shaffof glass effekti */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.glass:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    height: 60px;
+    position: relative;
+    z-index: 2;
+}
+
+.logo {
+    height: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.theme-toggle button:hover {
+    transform: rotate(15deg);
+    opacity: 0.8;
+}
+
+/* Main Content */
+.main {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.left-panel {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.left-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.left-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.left-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* O‘ng panel o‘rnida video va promo */
+.right-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.right-video {
+    flex: 1;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.right-video:hover {
+    transform: scale(1.01);
+}
+
+.right-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Jadval dizayni */
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #ffffff;
+}
+
+.ticket-table thead th {
+    font-weight: 600;
+    font-size: 16px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.ticket-table tbody tr {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+}
+
+.ticket-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ticket-table td {
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 18px;
+    padding: 8px;
+    text-align: center;
+}
+
+/* Promo ma'lumot */
+.promo-info {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 10px;
+    width: 100%;
+}
+
+.announcement {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    font-size: 64px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    width: 100%;
+    max-width: 80%;
+    background: rgba(48, 46, 46, 0.87);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+
+    /* MARKAZLASHTIRISH uchun FLEX */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+.right-video .announcement {
+    width: 100%;
+    max-width: 90%;
+    left: 5%;
+    top: 5%;
+    bottom: 5%;
+    right: 5%;
+
+    transform: translate(-50%, -50%);
+}
+
+.announcement.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Asosiy footer */
+.footer {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    position: relative;
+    z-index: 2;
+    color: #d0d0d0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background: linear-gradient(135deg, #121212 0%, #1c2526 100%);
+}
+
+body.dark-mode .glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .promo-info,
+body.dark-mode .header-title,
+body.dark-mode .ticket-table th,
+body.dark-mode .ticket-table td {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Animatsiyalar */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glass {
+    animation: fadeIn 0.5s ease forwards;
+}

@@ -1,0 +1,84 @@
+{% if serving_ticket %}
+<p><strong>Chipta:</strong> {{ serving_ticket.ticket_number }}</p>
+<p><strong>Xizmat:</strong> {{ serving_ticket.service.name }}</p>
+<p><strong>Boshlangan:</strong> {{ serving_ticket.started_at|date:"H:i" }}</p>
+<p class="timer-display">⏱ <span id="timer">00:00</span></p>
+<input type="hidden" id="timer-start-time" data-ticket-id="{{ serving_ticket.id }}"
+       value="{{ serving_ticket.started_at|date:'Y-m-d H:i:s' }}">
+
+<div class="d-flex gap-2 mt-3">
+    <form method="POST" action="{% url 'complete-ticket' serving_ticket.id %}">
+        {% csrf_token %}
+        <button class="btn btn-success w-100">✅ Yakunlash</button>
+    </form>
+    <form method="POST" action="{% url 'cancel-ticket' serving_ticket.id %}">
+        {% csrf_token %}
+        <button class="btn btn-danger w-100">❌ Rad etish</button>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    let timerIntervalId = null;
+    let currentServingId = null;
+
+    function updateTimerDisplay(startTime) {
+        const timerEl = document.getElementById("timer");
+        if (!timerEl || !startTime) return;
+
+        function update() {
+            const now = new Date();
+            const seconds = Math.floor((now - startTime) / 1000);
+            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            timerEl.textContent = `${m}:${s}`;
+            // Silliq yangilash uchun requestAnimationFrame ishlatamiz
+            timerIntervalId = requestAnimationFrame(update);
+        }
+
+        update();
+    }
+
+    function refreshServingTicket() {
+        fetch("{% url 'ajax-serving-ticket' %}")
+            .then(r => r.json())
+            .then(data => {
+                const parser = new DOMParser();
+                const newDoc = parser.parseFromString(data.html, 'text/html');
+                const newTimerStartEl = newDoc.getElementById("timer-start-time");
+                const newTicketId = newTimerStartEl?.dataset.ticketId;
+
+                // Faqat ticket o‘zgarganda DOM'ni yangilaymiz
+                if (newTicketId !== currentServingId) {
+                    document.getElementById("serving-ticket-box").innerHTML = data.html;
+                    currentServingId = newTicketId;
+                    if (timerIntervalId) cancelAnimationFrame(timerIntervalId);
+                    if (newTimerStartEl) {
+                        const startTime = new Date(newTimerStartEl.value);
+                        updateTimerDisplay(startTime);
+                    }
+                }
+            })
+            .catch(error => console.error("Serving ticket yangilashda xato:", error));
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const timerStartEl = document.getElementById("timer-start-time");
+        if (timerStartEl) {
+            currentServingId = timerStartEl.dataset.ticketId;
+            const startTime = new Date(timerStartEl.value);
+            updateTimerDisplay(startTime);
+        }
+
+        // Har 3 sekundda faqat serving ticketni tekshiramiz
+        setInterval(refreshServingTicket, 3000);
+    });
+
+    // Sahifa yopilganda timer to‘xtatiladi
+    window.addEventListener("unload", () => {
+        if (timerIntervalId) cancelAnimationFrame(timerIntervalId);
+    });
+</script>
+
+{% else %}
+<p class="text-muted">Hozircha xizmat ko‘rsatilmayapti.</p>
+{% endif %}

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NamDPI — Navbat olish</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<video autoplay muted loop class="bg-video">
+  <source src="assets/web.webm" type="video/webm" />
+</video>
+
+<div class="overlay">
+  <div class="top-bar">
+    <div class="theme-toggle">
+      <label class="switch">
+        <input type="checkbox" id="themeSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="clock" class="clock"></div>
+  </div>
+
+  <div class="header">
+    <img src="assets/logo.png" class="logo" alt="NamDPI Logo" />
+    <h1>NamDPI — Navbat olish terminali</h1>
+  </div>
+
+  <div class="content-area">
+    <div id="section-list" class="grid scrollable"></div>
+    <div id="subservice-list" class="grid scrollable hidden"></div>
+  </div>
+
+  <div id="back-btn" class="back-btn hidden" onclick="goBack()">⬅️ Ortga qaytish</div>
+</div>
+
+<footer>
+  <p>Namangan davlat pedagogika instituti | NamDPI RTTM</p>
+  <p style="font-size: 11px;">Dasturchi: Izzatbek Ulkanov</p>
+</footer>
+
+<!-- 🎟 Modal: Chipta ko‘rsatish -->
+<div class="modal hidden" id="modal">
+  <div class="modal-content">
+    <h2 id="modal-title">Chipta raqami</h2>
+    <p id="modal-text"></p>
+    <button onclick="closeModal()">Yopish</button>
+  </div>
+</div>
+
+<!-- 🖨 Modal: Printer tanlash -->
+<div class="modal hidden" id="printer-modal">
+  <div class="modal-content">
+    <h2>Printerni tanlang</h2>
+    <select id="printerSelectModal" style="font-size: 16px; padding: 6px 12px;"></select>
+    <p id="no-printer-message" class="hidden" style="color: red; font-size: 14px;">Printer topilmadi</p>
+    <br><br>
+    <button onclick="closePrinterModal()">Saqlash</button>
+  </div>
+</div>
+
+<audio id="click-sound" src="assets/click.wav" preload="auto"></audio>
+
+<script src="print.js"></script>
+<script>
+  const apiBase = "https://webtest.namspi.uz/api";
+  const clickSound = document.getElementById("click-sound");
+  let lastTicketData = null; // Oxirgi chipta ma'lumotlarini saqlash uchun
+
+  // Log yozish funksiyasi
+  function logToFile(message, level = 'INFO') {
+    try {
+      window.electronAPI.logToFile(message, level);
+      console.log(`${new Date().toISOString()} [${level}] ${message}`);
+    } catch (err) {
+      console.error('❌ Log yozishda xato:', err.message);
+    }
+  }
+
+  function playClick() {
+    try {
+      clickSound.currentTime = 0;
+      clickSound.play();
+      logToFile('Tugma bosildi (ovoz ijro etildi)');
+    } catch (e) {
+      logToFile(`Ovoz ijro etishda xato: ${e.message}`, 'ERROR');
+    }
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+    const date = now.toLocaleDateString("uz-UZ");
+    document.getElementById("clock").innerText = `${date} | ${time}`;
+  }
+
+  async function loadSections() {
+    try {
+      logToFile('Bo‘limlarni yuklash boshlandi');
+      const cached = localStorage.getItem("sections");
+      if (cached) {
+        const data = JSON.parse(cached);
+        renderSections(data.sections);
+        logToFile('Bo‘limlar keshdan yuklandi');
+        return;
+      }
+
+      const res = await fetch(`${apiBase}/sections/`);
+      if (!res.ok) throw new Error(`HTTP xato: ${res.status}`);
+      const data = await res.json();
+      localStorage.setItem("sections", JSON.stringify(data));
+      renderSections(data.sections);
+      logToFile(`Bo‘limlar yuklandi: ${data.sections.length} ta`);
+    } catch (error) {
+      logToFile(`Bo‘limlarni yuklashda xato: ${error.message}`, 'ERROR');
+      showModal("Xatolik", "Bo‘limlarni yuklashda xato yuz berdi. Iltimos, keyinroq urinib ko‘ring.");
+    }
+  }
+
+  function renderSections(sections) {
+    const container = document.getElementById("section-list");
+    container.innerHTML = "";
+    document.getElementById("back-btn").classList.add("hidden");
+
+    sections.forEach((section) => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `<h3>${section.name}</h3><p>${section.description || ""}</p>`;
+      card.onclick = () => {
+        playClick();
+        loadSubservices(section.id);
+      };
+      container.appendChild(card);
+    });
+    logToFile('Bo‘limlar render qilindi');
+  }
+
+  async function loadSubservices(sectionId) {
+    try {
+      logToFile(`Xizmatlarni yuklash boshlandi: sectionId=${sectionId}`);
+      const cacheKey = `subservices_${sectionId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const data = JSON.parse(cached);
+        renderSubservices(data.subservices);
+        logToFile('Xizmatlar keshdan yuklandi');
+        return;
+      }
+
+      const res = await fetch(`${apiBase}/sections/${sectionId}/subservices/`);
+      if (!res.ok) throw new Error(`HTTP xato: ${res.status}`);
+      const data = await res.json();
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      renderSubservices(data.subservices);
+      logToFile(`Xizmatlar yuklandi: ${data.subservices.length} ta`);
+    } catch (error) {
+      logToFile(`Xizmatlarni yuklashda xato: ${error.message}`, 'ERROR');
+      showModal("Xatolik", "Xizmatlarni yuklashda xato yuz berdi. Iltimos, keyinroq urinib ko‘ring.");
+    }
+  }
+
+  function renderSubservices(subservices) {
+    document.getElementById("section-list").classList.add("hidden");
+    const container = document.getElementById("subservice-list");
+    container.innerHTML = "";
+
+    subservices.forEach((s) => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `<h3>${s.name}</h3><p>${s.description || ""}</p>`;
+      card.onclick = () => {
+        playClick();
+        createTicket(s.id);
+      };
+      container.appendChild(card);
+    });
+
+    container.classList.remove("hidden");
+    document.getElementById("back-btn").classList.remove("hidden");
+    logToFile('Xizmatlar render qilindi');
+  }
+
+  async function createTicket(subserviceId) {
+    try {
+      logToFile(`Chipta yaratish boshlandi: subserviceId=${subserviceId}`);
+      const res = await fetch(`${apiBase}/ticket/create/${subserviceId}/`, {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
+      if (!res.ok) throw new Error(`HTTP xato: ${res.status}`);
+      const data = await res.json();
+
+      if (data.success) {
+        logToFile(`Chipta yaratildi: ${data.ticket_number}`);
+        lastTicketData = data; // Ma'lumotlarni saqlash
+        showModal(data.ticket_number, `${data.subservice_name}<br><small>${data.section_name}</small>`);
+      } else {
+        throw new Error(data.message || "Chipta olinmadi");
+      }
+    } catch (error) {
+      logToFile(`Chipta yaratishda xato: ${error.message}`, 'ERROR');
+      showModal("Xatolik", `Chipta yaratishda xato yuz berdi: ${error.message}`);
+    }
+  }
+
+  function showModal(title, text) {
+    document.getElementById("modal-title").innerHTML = `🎟 ${title}`;
+    document.getElementById("modal-text").innerHTML = text;
+    document.getElementById("modal").classList.remove("hidden");
+    document.querySelector(".overlay").style.pointerEvents = "none";
+    logToFile(`Modal ochildi: title=${title}`);
+  }
+
+  function closeModal() {
+    document.getElementById("modal").classList.add("hidden");
+    document.querySelector(".overlay").style.pointerEvents = "auto";
+    logToFile('Modal yopildi');
+
+    // print.js dagi printTicket ni chaqirish
+    if (lastTicketData) {
+      try {
+        if (window.printAPI && typeof window.printAPI.printTicket === 'function') {
+          window.printAPI.printTicket(lastTicketData);
+          logToFile(`print.js printTicket chaqirildi: ticket_number=${lastTicketData.ticket_number}`);
+        } else {
+          logToFile('printAPI.printTicket funksiyasi topilmadi', 'ERROR');
+        }
+      } catch (error) {
+        logToFile(`print.js printTicket chaqirishda xato: ${error.message}`, 'ERROR');
+      }
+    } else {
+      logToFile('Chipta ma‘lumotlari topilmadi', 'WARNING');
+    }
+
+    goBack(true);
+  }
+
+  function goBack(reset = false) {
+    document.getElementById("subservice-list").classList.add("hidden");
+    document.getElementById("section-list").classList.remove("hidden");
+    document.getElementById("back-btn").classList.add("hidden");
+    if (reset) loadSections();
+    logToFile('Ortga qaytildi');
+  }
+
+  async function showPrinterModal() {
+    try {
+      logToFile('Printer modalini ochish boshlandi');
+      const printers = await window.electronAPI.getPrinters();
+      const saved = await window.electronAPI.getSavedPrinter();
+      const select = document.getElementById("printerSelectModal");
+      const noPrinterMessage = document.getElementById("no-printer-message");
+
+      select.innerHTML = "";
+
+      if (printers.length === 0) {
+        noPrinterMessage.classList.remove("hidden");
+        select.innerHTML = '<option value="">Printer topilmadi</option>';
+        logToFile('Hech qanday printer topilmadi', 'WARNING');
+      } else {
+        noPrinterMessage.classList.add("hidden");
+        printers.forEach((p) => {
+          const option = document.createElement("option");
+          option.value = p.name;
+          option.textContent = p.name;
+          if (p.name === saved) option.selected = true;
+          select.appendChild(option);
+        });
+        logToFile(`Printerlar yuklandi: ${printers.length} ta`);
+      }
+
+      document.getElementById("printer-modal").classList.remove("hidden");
+      document.querySelector(".overlay").style.pointerEvents = "none";
+    } catch (error) {
+      logToFile(`Printer modalini ochishda xato: ${error.message}`, 'ERROR');
+      showModal("Xatolik", "Printerlarni yuklashda xato yuz berdi.");
+    }
+  }
+
+  function closePrinterModal() {
+    const selectedPrinter = document.getElementById("printerSelectModal").value;
+    if (selectedPrinter) {
+      window.electronAPI.saveSelectedPrinter(selectedPrinter);
+      logToFile(`Printer saqlandi: ${selectedPrinter}`);
+    }
+
+    document.getElementById("printer-modal").classList.add("hidden");
+    document.querySelector(".overlay").style.pointerEvents = "auto";
+    logToFile('Printer modali yopildi');
+  }
+
+  // 🌗 Mavzu almashtirish
+  document.getElementById("themeSwitch").addEventListener("change", function () {
+    document.body.classList.toggle("light-mode");
+    logToFile('Mavzu almashtirildi');
+  });
+
+  // ⏰ Soat va xizmatlar yuklash
+  setInterval(updateClock, 1000);
+  updateClock();
+  loadSections();
+
+  // 🖨 Ctrl+P => printer modalini ochish
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey && e.key === "p") {
+      e.preventDefault();
+      showPrinterModal();
+      logToFile('Ctrl+P orqali printer modali ochildi');
+    }
+  });
+
+  // Menyudan printer modalini ochish
+  window.electronAPI.onShowPrinterModal(() => {
+    showPrinterModal();
+    logToFile('Menyudan printer modali ochildi');
+  });
+</script>
+</body>
+</html>

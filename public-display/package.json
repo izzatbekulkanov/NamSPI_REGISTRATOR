@@ -1,0 +1,29 @@
+{
+    "name": "navbat-app",
+    "version": "1.0.0",
+    "description": "NamDPI xizmat ko‘rsatilayotgan chiptalar monitori",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder"
+    },
+    "author": "NamDPI",
+    "license": "MIT",
+    "devDependencies": {
+        "electron": "^29.0.0",
+        "electron-builder": "^24.13.0"
+    },
+    "build": {
+        "appId": "uz.namdpi.xizmatapp",
+        "productName": "NamDPI Xizmat Monitor",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "**/*"
+        ],
+        "win": {
+            "target": "nsis"
+        }
+    }
+}

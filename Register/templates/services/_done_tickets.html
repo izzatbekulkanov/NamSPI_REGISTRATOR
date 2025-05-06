@@ -1,0 +1,36 @@
+{% if done_tickets %}
+<div class="table-responsive scroll-box">
+  <table class="table table-sm table-hover align-middle">
+    <thead>
+      <tr>
+        <th>Chipta</th>
+        <th>Xizmat</th>
+        <th>Vaqt</th>
+        <th>Holat</th>
+        <th>Davomiylik</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in done_tickets %}
+      <tr>
+        <td><strong class="text-success">{{ ticket.ticket_number }}</strong></td>
+        <td>{{ ticket.service.name }}</td>
+        <td>{{ ticket.ended_at|date:"H:i" }}</td>
+        <td>
+          {% if ticket.result == "completed" %}
+          <span class="badge badge-result badge-completed">Bajarildi</span>
+          {% elif ticket.result == "rejected" %}
+          <span class="badge badge-result badge-rejected">Rad etildi</span>
+          {% else %}
+          <span class="text-muted">-</span>
+          {% endif %}
+        </td>
+        <td>{{ ticket.duration_display }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-muted">Yakunlangan xizmatlar yo‘q.</p>
+{% endif %}
