@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i+k*caa5%%t06o&pe-v@^y9+-+!vqfu1*hc@pgd7=y^u5&gtho'
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = [
     'webtest.namspi.uz',
     'navbat.namspi.uz',
@@ -35,7 +35,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
+    # "django_browser_reload.middleware.BrowserReloadMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
