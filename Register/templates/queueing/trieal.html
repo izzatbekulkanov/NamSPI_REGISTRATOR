@@ -1,0 +1,84 @@
+{% extends "queueing/queueing_base.html" %}
+{% load static %}
+
+{% block title %}Registrator Navbat Tizimi{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #485563, #29323c);
+    color: #f2f2f2;
+  }
+
+  .info-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    margin-top: 40px;
+  }
+
+  .info-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+  }
+
+  .info-text {
+    font-size: 1.15rem;
+    line-height: 1.75;
+    text-align: justify;
+    color: #e0e0e0;
+  }
+
+  .highlight {
+    color: #00ffd5;
+    font-weight: 600;
+  }
+
+  .section-divider {
+    border-top: 1px solid rgba(255,255,255,0.2);
+    margin: 2rem 0;
+  }
+
+</style>
+
+<div class="container py-5">
+  <div class="info-section">
+    <h2 class="info-title">Registrator Navbat Tizimi</h2>
+    <p class="info-text">
+      Ushbu raqamlashtirilgan navbat tizimi <span class="highlight">Namangan davlat pedagogika instituti</span>ning
+      <span class="highlight">Registrator bo‘limi</span> faoliyatini optimallashtirish maqsadida ishlab chiqilgan.
+      Dastur talaba va abituriyentlarga navbatda ortiqcha kutib turmasdan,
+      o‘zlariga kerakli xizmatni qulay tarzda tanlash imkonini beradi.
+    </p>
+
+    <div class="section-divider"></div>
+
+    <p class="info-text">
+      <span class="highlight">Tizimning asosiy vazifalari:</span><br>
+      • Xizmat yo‘nalishlarini onlayn ko‘rish va tanlash<br>
+      • Har bir foydalanuvchi uchun real vaqtli navbat raqamini olish<br>
+      • Navbatdagi foydalanuvchini displey orqali ko‘rish<br>
+      • Bo‘lim ishini raqamlashtirish orqali qog‘ozbozlikni kamaytirish
+    </p>
+
+    <div class="section-divider"></div>
+
+    <div class="section-divider"></div>
+
+    <p class="info-text">
+      Ushbu tizim institut ma'muriyati, talabalar va abituriyentlar o‘rtasidagi
+      <span class="highlight">aloqani soddalashtirish</span>, xizmat ko‘rsatish tezligini
+      <span class="highlight">oshirish</span> va insoniy xatoliklarni <span class="highlight">minimumga tushirish</span> uchun joriy etilgan.
+    </p>
+  </div>
+</div>
+{% endblock %}
