@@ -10,8 +10,9 @@
     "author": "NamDPI",
     "license": "MIT",
     "devDependencies": {
-        "electron": "^29.0.0",
-        "electron-builder": "^24.13.0"
+        "electron": "^29.4.6",
+        "electron-builder": "^24.13.3",
+        "electron-packager": "^17.1.2"
     },
     "build": {
         "appId": "uz.namdpi.xizmatapp",

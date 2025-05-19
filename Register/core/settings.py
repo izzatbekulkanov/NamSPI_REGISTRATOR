@@ -3,7 +3,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i+k*caa5%%t06o&pe-v@^y9+-+!vqfu1*hc@pgd7=y^u5&gtho'
 DEBUG = True
-ALLOWED_HOSTS = ['webtest.namspi.uz', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'webtest.namspi.uz',
+    'navbat.namspi.uz',
+    'localhost',
+    '127.0.0.1'
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -99,5 +104,6 @@ LOGIN_REDIRECT_URL = '/registrator/'  # Muvaffaqiyatli login bo‘lsa qayerga ol
 LOGOUT_REDIRECT_URL = '/'  # Logoutdan keyin qayerga yo‘naltiradi
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://webtest.namspi.uz"
+    "https://webtest.namspi.uz",
+    "https://navbat.namspi.uz"
 ]
