@@ -10,8 +10,8 @@ urlpatterns = [
     path('registrator/', include('registrator.urls')),  # Registrator bo‘limi
 ]
 
-# Faqat DEBUG holatda browser reload yo‘llarini qo‘shish
-if settings.DEBUG:
-    urlpatterns += [
-        path("__reload__/", include("django_browser_reload.urls")),
-    ]
+# # Faqat DEBUG holatda browser reload yo‘llarini qo‘shish
+# if settings.DEBUG:
+#     urlpatterns += [
+#         path("__reload__/", include("django_browser_reload.urls")),
+#     ]

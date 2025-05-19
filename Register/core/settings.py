@@ -25,8 +25,8 @@ INSTALLED_APPS = [
     'api',
 ]
 
-if DEBUG:
-    INSTALLED_APPS += ["django_browser_reload"]
+# if DEBUG:
+#     INSTALLED_APPS += ["django_browser_reload"]
 
 AUTH_USER_MODEL = 'members.CustomUser'
 
