@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i+k*caa5%%t06o&pe-v@^y9+-+!vqfu1*hc@pgd7=y^u5&gtho'
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = [
     'webtest.namspi.uz',
     'navbat.namspi.uz',
@@ -89,13 +89,15 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+import os
+
 LANGUAGE_CODE = 'uz'
 TIME_ZONE = 'Asia/Tashkent'
 USE_I18N = True
 USE_TZ = False  # Agar siz lokal vaqtni ishlatmoqchi bo‘lsangiz, False bo‘lishi kerak
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # static fayllarni qayerdan topadi (dev uchun)
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic qayerga saqlaydi (prod uchun)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # agar mavjud bo‘lsa
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
