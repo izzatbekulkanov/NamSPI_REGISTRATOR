@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i+k*caa5%%t06o&pe-v@^y9+-+!vqfu1*hc@pgd7=y^u5&gtho'
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = [
     'webtest.namspi.uz',
     'navbat.namspi.uz',
@@ -17,7 +17,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bootstrap5',
-    'django_browser_reload',  # (optional) live reload uchun
     'members',
     'registrator',
     'queueing',
@@ -25,6 +24,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ["django_browser_reload"]
 
 AUTH_USER_MODEL = 'members.CustomUser'
 
