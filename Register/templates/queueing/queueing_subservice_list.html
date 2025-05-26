@@ -34,6 +34,54 @@
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.3);
     }
+
+    /* Maxsus modal stillari */
+    .custom-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+    }
+
+    .custom-modal-content {
+        background: #ffffff;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .ticket-number {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+        padding: 2rem 0;
+    }
+
+    .close-btn {
+        background-color: #333;
+        color: #ffffff;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        font-size: 1.2rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .close-btn:hover {
+        background-color: #555;
+    }
 </style>
 
 <div class="container py-5">
@@ -64,24 +112,30 @@
         Bu bo‘limda hozircha hech qanday xizmat mavjud emas.
     </div>
     {% endif %}
-</div>
 
-<!-- Hidden iframe for auto-print -->
-<!-- IFRAME for silent printing -->
-<iframe id="printFrame" style="display: none;"></iframe>
+    <!-- Maxsus modal -->
+    <div class="custom-modal" id="ticketModal">
+        <div class="custom-modal-content">
+            <div id="ticketDisplay" class="ticket-number"></div>
+            <button type="button" class="close-btn mt-4" onclick="closeModal()">Yopish</button>
+        </div>
+    </div>
+
+    <!-- Printer bilan bog'liq iframe izoh sifatida yashirildi -->
+    <!-- <iframe id="printFrame" style="display: none;"></iframe> -->
+</div>
 {% endblock %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <audio id="click-sound" src="{% static 'sound/click.wav' %}" preload="auto"></audio>
 
 <script>
     const clickSound = document.getElementById("click-sound");
+    const ticketModal = document.getElementById("ticketModal");
 
     function getTicket(serviceId) {
         clickSound.currentTime = 0;
-        clickSound.play().catch(() => {
-        });
+        clickSound.play().catch(() => {});
 
         fetch(`/ticket/create/${serviceId}/`, {
             method: 'POST',
@@ -93,24 +147,30 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Navbat olindi',
-                        html: `<strong>${data.ticket_number}</strong> raqamli chipta chop etilmoqda...`,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                    // Navbat raqamini modalda katta ko'rsatish
+                    const ticketDisplay = document.getElementById('ticketDisplay');
+                    ticketDisplay.innerHTML = `Sizning navbat raqamingiz: ${data.ticket_number}`;
 
+                    // Modalni ko'rsatish
+                    ticketModal.style.display = 'flex';
+
+                    // 10 soniyadan keyin modalni yopish va redirect qilish
                     setTimeout(() => {
-                        printTicket(data);
-                        setTimeout(() => {
-                            window.location.href = "{% url 'queueing-section-list' %}";
-                        }, 3000);
-                    }, 1000);
+                        ticketModal.style.display = 'none';
+                        window.location.href = "{% url 'queueing-section-list' %}";
+                    }, 10000);
                 }
             });
     }
 
+    function closeModal() {
+        ticketModal.style.display = 'none';
+        // Modal yopilganda darhol redirect qilish
+        window.location.href = "{% url 'queueing-section-list' %}";
+    }
+
+    // Printer bilan bog'liq funksiya izoh sifatida yashirildi
+    /*
     function printTicket(data) {
         const now = new Date();
         const time = now.toLocaleTimeString('uz-UZ');
@@ -174,5 +234,6 @@
         frameWindow.document.write(html);
         frameWindow.document.close();
     }
+    */
 </script>
 {% endblock %}

@@ -16,6 +16,10 @@ import json
 
 def section_list_view(request):
     sections = Section.objects.all()
+    return render(request, 'queueing/queueing_order_list.html', {'sections': sections})
+
+def section_trial_view(request):
+    sections = Section.objects.all()
     return render(request, 'queueing/trieal.html', {'sections': sections})
 
 
