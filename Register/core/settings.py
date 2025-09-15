@@ -10,6 +10,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 INSTALLED_APPS = [
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -17,10 +18,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bootstrap5',
+    "channels",
     'members',
     'registrator',
     'queueing',
-    'channels',
     'rest_framework',
     'api',
 ]
@@ -111,3 +112,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://webtest.namspi.uz",
     "https://navbat.namspi.uz"
 ]
+
+# Channels default backend (dev uchun)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
