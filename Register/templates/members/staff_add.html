@@ -4,10 +4,10 @@
 {% block title %}Hodim boshqaruvi{% endblock %}
 
 {% block content %}
-
 <div class="col-md-9 col-lg-10 py-4 border-end shadow-sm min-vh-100 rounded-end">
     <div class="container py-4">
         <h4 class="fw-semibold mb-4">Hodim qo‘shish</h4>
+
         <form method="POST" id="staffForm">
             {% csrf_token %}
             <div class="row g-2">
@@ -76,9 +76,45 @@
                 <button type="submit" class="btn btn-primary btn-sm px-4">Saqlash</button>
             </div>
         </form>
+
+        <hr class="my-4">
+
+        <h5 class="fw-semibold mb-3">Hodimlar ro‘yxati</h5>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>F.I.O</th>
+                        <th>Username</th>
+                        <th>Bo‘lim</th>
+                        <th>Lavozim</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.department_name }}</td>
+                        <td>{{ user.staff_position }}</td>
+                        <td>
+                            {% if user.is_superuser %}Admin{% elif user.is_leader %}Rahbar{% elif user.is_operator %}Operator{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Hozircha hodimlar mavjud emas</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
-
 {% endblock %}
 
 {% block script %}
@@ -164,4 +200,19 @@
         }
     });
 </script>
+
+{% if messages %}
+<script>
+    {% for message in messages %}
+    Swal.fire({
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000
+    });
+    {% endfor %}
+</script>
+{% endif %}
 {% endblock %}
