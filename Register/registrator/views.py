@@ -106,14 +106,14 @@ def service_dashboard(request):
             if form.is_valid():
                 form.save()
                 messages.success(request, "Bo‘lim muvaffaqiyatli saqlandi.")
-                return redirect("service-dashboard")
+                return redirect("service-services")
 
         elif 'subservice_submit' in request.POST:
             form = SubServiceForm(request.POST)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Xizmat muvaffaqiyatli qo‘shildi.")
-                return redirect("service-dashboard")
+                return redirect("service-services")
 
     context = {
         'sections': sections,
