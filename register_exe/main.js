@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
@@ -51,6 +51,46 @@ app.whenReady().then(async () => {
                     click: () => {
                         mainWindow.webContents.send('show-printer-modal');
                         logToFile('Printer tanlash oynasi ochildi');
+                    },
+                },
+                {
+                    label: 'Yangilash ma\'lumotlar',
+                    click: () => {
+                        mainWindow.webContents.send('refresh-data');
+                        logToFile('Ma\'lumotlar yangilandi');
+                    },
+                },
+                {
+                    label: 'Loglarni ko\'rish',
+                    click: async () => {
+                        try {
+                            await shell.openPath(logFilePath);
+                            await logToFile('Log fayli ochildi');
+                        } catch (err) {
+                            await logToFile(`Log faylini ochishda xato: ${err.message}`, 'ERROR');
+                        }
+                    },
+                },
+                {
+                    label: 'Oxirgi chiptani qayta chop etish',
+                    click: () => {
+                        mainWindow.webContents.send('reprint-ticket');
+                        logToFile('Oxirgi chipta qayta chop etish so\'raldi');
+                    },
+                },
+                {
+                    label: 'Ilovani qayta ishga tushirish',
+                    click: () => {
+                        mainWindow.webContents.send('restart-app');
+                        logToFile('Ilova qayta ishga tushirish so\'raldi');
+                    },
+                },
+                { type: 'separator' },
+                {
+                    label: 'Yordam',
+                    click: async () => {
+                        await shell.openExternal('https://www.namspi.uz');
+                        await logToFile('Yordam sahifasi ochildi: https://www.namspi.uz');
                     },
                 },
                 { type: 'separator' },
@@ -111,38 +151,34 @@ app.whenReady().then(async () => {
 
             await logToFile(`Saqlangan printer: ${options.deviceName}`);
 
-            // Alohida yashirin oynada HTML’ni chop etish
             const printWindow = new BrowserWindow({
-                show: false, // Oynani ko‘rsatmaymiz
+                show: false,
                 webPreferences: {
                     nodeIntegration: false,
                     contextIsolation: true,
                 },
             });
 
-            // HTML’ni printWindow’da ko‘rsatish
             const htmlContent = `data:text/html;charset=UTF-8,${encodeURIComponent(html)}`;
             await printWindow.loadURL(htmlContent);
             await logToFile('Chop etish uchun HTML oynaga yuklandi');
 
-            // Chop etish sozlamalari
             const printSettings = {
                 silent: options.silent || true,
                 deviceName: options.deviceName,
-                pageSize: options.pageSize || { width: 58000, height: 80000 }, // Default: 58mm x 80mm
+                pageSize: options.pageSize || { width: 58000, height: 80000 },
                 margins: options.margins || { marginType: 'none' },
             };
 
             await logToFile(`Chop etish uchun sozlamalar: ${JSON.stringify(printSettings)}`);
 
-            // Chop etish
             printWindow.webContents.print(printSettings, (success, errorType) => {
                 if (!success) {
                     logToFile(`Chop etishda xato: ${errorType}`, 'ERROR');
                 } else {
                     logToFile('Chop etish muvaffaqiyatli yakunlandi');
                 }
-                printWindow.destroy(); // Oynani yopamiz
+                printWindow.destroy();
             });
 
             return true;

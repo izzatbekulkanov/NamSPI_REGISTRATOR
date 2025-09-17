@@ -218,7 +218,6 @@
     document.querySelector(".overlay").style.pointerEvents = "auto";
     logToFile('Modal yopildi');
 
-    // print.js dagi printTicket ni chaqirish
     if (lastTicketData) {
       try {
         if (window.printAPI && typeof window.printAPI.printTicket === 'function') {
@@ -291,6 +290,55 @@
     logToFile('Printer modali yopildi');
   }
 
+  // Yangi: Selektiv kesh tozalash
+  function clearCache() {
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('sections') || key.startsWith('subservices_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      logToFile('Kesh tozalandi (sections va subservices)');
+    } catch (err) {
+      logToFile(`Kesh tozalashda xato: ${err.message}`, 'ERROR');
+    }
+  }
+
+  // Yangi: Oxirgi chiptani qayta chop etish
+  async function reprintTicket() {
+    try {
+      if (!lastTicketData) {
+        logToFile('Qayta chop etish uchun chipta ma\'lumotlari topilmadi', 'WARNING');
+        showModal("Xatolik", "Oxirgi chipta ma'lumotlari topilmadi.");
+        return;
+      }
+      logToFile(`Oxirgi chipta qayta chop etilmoqda: ticket_number=${lastTicketData.ticket_number}`);
+      await window.printAPI.printTicket(lastTicketData);
+      showModal("Muvaffaqiyat", `Chipta ${lastTicketData.ticket_number} qayta chop etildi.`);
+    } catch (err) {
+      logToFile(`Chipta qayta chop etishda xato: ${err.message}`, 'ERROR');
+      showModal("Xatolik", `Chipta qayta chop etishda xato: ${err.message}`);
+    }
+  }
+
+  // Yangi: Ilovani qayta ishga tushirish
+  function restartApp() {
+    try {
+      clearCache();
+      document.getElementById("section-list").innerHTML = "";
+      document.getElementById("subservice-list").innerHTML = "";
+      document.getElementById("subservice-list").classList.add("hidden");
+      document.getElementById("section-list").classList.remove("hidden");
+      document.getElementById("back-btn").classList.add("hidden");
+      loadSections();
+      logToFile('Ilova qayta ishga tushirildi');
+      showModal("Muvaffaqiyat", "Ilova qayta ishga tushirildi.");
+    } catch (err) {
+      logToFile(`Ilova qayta ishga tushirishda xato: ${err.message}`, 'ERROR');
+      showModal("Xatolik", "Ilova qayta ishga tushirishda xato yuz berdi.");
+    }
+  }
+
   // 🌗 Mavzu almashtirish
   document.getElementById("themeSwitch").addEventListener("change", function () {
     document.body.classList.toggle("light-mode");
@@ -315,6 +363,29 @@
   window.electronAPI.onShowPrinterModal(() => {
     showPrinterModal();
     logToFile('Menyudan printer modali ochildi');
+  });
+
+  // Ma'lumotlar yangilash handleri
+  window.electronAPI.onRefreshData(() => {
+    try {
+      clearCache();
+      loadSections();
+      logToFile('Ma\'lumotlar yangilandi va kesh tozalandi');
+      showModal("Muvaffaqiyat", "Ma'lumotlar yangilandi! Endi yangi bo'limlar ko'rinadi.");
+    } catch (err) {
+      logToFile(`Yangilashda xato: ${err.message}`, 'ERROR');
+      showModal("Xatolik", "Yangilashda xato yuz berdi.");
+    }
+  });
+
+  // Oxirgi chiptani qayta chop etish handleri
+  window.electronAPI.onReprintTicket(() => {
+    reprintTicket();
+  });
+
+  // Ilovani qayta ishga tushirish handleri
+  window.electronAPI.onRestartApp(() => {
+    restartApp();
   });
 </script>
 </body>

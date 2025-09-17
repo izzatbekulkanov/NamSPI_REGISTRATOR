@@ -1,6 +1,6 @@
 // === render.js ===
 
-const API = "https://webtest.namspi.uz/";
+const API = "https://navbat.namspi.uz/";
 
 // Log yozish funksiyasi
 function logToFile(message, level = 'INFO') {
