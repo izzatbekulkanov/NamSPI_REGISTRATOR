@@ -100,3 +100,5 @@ def ajax_operator_serving_tickets(request):
     print("🧾 Barcha operatorlar kutayotgan navbatlar:", ticket_data)
 
     return JsonResponse({'tickets': ticket_data})
+
+

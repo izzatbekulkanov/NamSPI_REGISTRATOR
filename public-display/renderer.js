@@ -1,4 +1,4 @@
-const API_URL = "https://navbat.namspi.uz/api/tickets/serving/";
+const API_URL = "https://webtest.namspi.uz/api/tickets/serving/";
 
 // Oldingi navbatlar ro‘yxatini saqlash
 let previousTickets = [];
@@ -21,10 +21,8 @@ async function fetchServingTickets() {
 
         // Yangi navbatlarni e’lonlar navbatiga qo‘shish
         if (newTickets.length > 0) {
-            newTickets.forEach(ticket => {
-                announcementQueue.push(ticket);
-            });
-            announceNextTicket();
+            announcementQueue.push(...newTickets);
+            if (!isAnnouncing) announceNextTicket(); // Agar e’lon jarayoni boshlanmagan bo‘lsa, darhol boshlash
         }
 
         // Jadvalni yangilash
@@ -56,22 +54,29 @@ function announceNextTicket() {
     const announcement = document.getElementById("announcement");
     const announcementText = document.getElementById("announcement-text");
 
-    // E’lon matni
+    // E’lon matnini darhol yangilash
     announcementText.textContent = `Navbat: ${ticket.ticket_number} | Oyna: ${ticket.window_number || "—"}`;
     announcement.classList.add("active");
 
-    // Ovoz o‘ynatish
-    const audio = new Audio("assets/sound/ding-dong.mp3");
-    audio.play().catch(error => console.error("❌ Ovoz xatolik:", error));
+    // Ovoz fayllarini ketma-ket o‘ynatish
+    const dingDongAudio = new Audio("assets/sound/ding-dong.mp3");
+    const voiceMaftunaAudio = new Audio("assets/sound/voice_maftuna.wav");
 
-    // 5 soniyadan so‘ng e’lonni yashirish
+    dingDongAudio.play().catch(error => console.error("❌ Ding-dong ovoz xatolik:", error));
+
+    // Ding-dong tugagach, voice_maftuna o‘ynaydi
+    dingDongAudio.onended = () => {
+        voiceMaftunaAudio.play().catch(error => console.error("❌ Voice_maftuna ovoz xatolik:", error));
+    };
+
+    // E’lonni 7 soniya ko‘rsatish (ding-dong ~2s + voice_maftuna ~5s uchun yetarli vaqt)
     setTimeout(() => {
         announcement.classList.remove("active");
         isAnnouncing = false;
         announceNextTicket(); // Keyingi e’lonni ko‘rsatish
-    }, 5000);
+    }, 7000);
 }
 
-// Har 5 soniyada yangilash
-setInterval(fetchServingTickets, 5000);
+// Har 3 soniyada yangilash (tezroq yangilash uchun 5s dan 3s ga kamaytirdim)
+setInterval(fetchServingTickets, 3000);
 fetchServingTickets();

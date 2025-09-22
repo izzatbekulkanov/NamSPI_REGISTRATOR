@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Statistika{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4">📊 Xodimlar statistikasi</h3>
+
+  <!-- Yil va Oy tanlash -->
+  <form method="get" class="row g-3 mb-3">
+    <div class="col-md-3">
+      <select name="year" class="form-select">
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select name="month" class="form-select">
+        {% for m_num, m_name in months %}
+          <option value="{{ m_num }}" {% if m_num == selected_month %}selected{% endif %}>
+            {{ m_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Tanlash</button>
+    </div>
+  </form>
+
+  <!-- Kunlarni button ko‘rinishida -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    {% for d in days_in_month %}
+      <a href="?year={{ selected_year }}&month={{ selected_month }}&day={{ d }}"
+         class="btn {% if selected_day|default:0 == d %}btn-success{% else %}btn-outline-secondary{% endif %}">
+         {{ d }}
+      </a>
+    {% endfor %}
+    <a href="?year={{ selected_year }}&month={{ selected_month }}" class="btn btn-warning">♻ Barchasi</a>
+  </div>
+
+  <!-- Jadval -->
+  <table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>👤 Hodim</th>
+        <th>🎭 Roli</th>
+        <th>🏢 Bo‘lim</th>
+        <th>💼 Lavozim</th>
+        <th>📅 Bugun</th>
+        <th>🗓 Shu oy</th>
+        <th>📊 Jami</th>
+        <th>⭐ Daraja</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in staff_stats %}
+      <tr>
+        <td>{{ s.user.full_name }}</td>
+        <td><span class="badge {{ s.user.role_badge }}">{{ s.role }}</span></td>
+        <td>{{ s.department }}</td>
+        <td>{{ s.position }}</td>
+        <td>{{ s.today }}</td>
+        <td>{{ s.this_month }}</td>
+        <td>{{ s.total }}</td>
+        <td>{{ s.level }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="text-center">Ma'lumot topilmadi</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}

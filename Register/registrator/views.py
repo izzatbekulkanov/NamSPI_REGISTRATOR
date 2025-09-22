@@ -1,3 +1,6 @@
+import calendar
+from datetime import date
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
@@ -6,12 +9,12 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-
-from members.models import DailyWorkWindow, OperatorProfile
+from django.db.models import Count, Q
+from members.models import DailyWorkWindow, OperatorProfile, CustomUser
 from .models import Section, SubService, AssignedService
 from .forms import SectionForm, SubServiceForm, AssignedServiceForm
 from queueing.models import QueueTicket
-
+from django.utils.timezone import localdate
 
 @login_required
 def dashboard(request):
@@ -153,17 +156,34 @@ def delete_assignment(request, pk):
     return redirect('service-dashboard')
 
 
+
 @login_required
 def operator_queue_view(request):
-    assigned_services = AssignedService.objects.filter(user=request.user).values_list('service_id', flat=True)
+    today = date.today()  # ✅ timezone muammosiz ishlaydi
+
+    assigned_services = AssignedService.objects.filter(
+        user=request.user
+    ).values_list('service_id', flat=True)
     assigned_services = list(assigned_services)
 
-    waiting_tickets = QueueTicket.objects.filter(service_id__in=assigned_services, status="waiting").order_by(
-        'created_at')
-    serving_ticket = QueueTicket.objects.filter(service_id__in=assigned_services, status="serving",
-                                                served_by=request.user).first()
-    done_tickets = QueueTicket.objects.filter(service_id__in=assigned_services, status="done",
-                                              served_by=request.user).order_by('-ended_at')[:20]
+    waiting_tickets = QueueTicket.objects.filter(
+        service_id__in=assigned_services,
+        status="waiting"
+    ).order_by('created_at')
+
+    serving_ticket = QueueTicket.objects.filter(
+        service_id__in=assigned_services,
+        status="serving",
+        served_by=request.user
+    ).first()
+
+    # ✅ faqat bugungi yakunlangan xizmatlar
+    done_tickets = QueueTicket.objects.filter(
+        service_id__in=assigned_services,
+        status="done",
+        served_by=request.user,
+        ended_at__date=today
+    ).order_by('-ended_at')[:20]
 
     for d in done_tickets:
         if d.started_at and d.ended_at:
@@ -311,3 +331,53 @@ def cancel_ticket(request, ticket_id):
 
     messages.error(request, f"❌ {ticket.ticket_number} - xizmat rad etildi.")
     return redirect('operator-queue')
+
+
+def statistics_display_view(request):
+    today = date.today()
+    selected_year = int(request.GET.get("year", today.year))
+    selected_month = int(request.GET.get("month", today.month))
+    selected_day = request.GET.get("day")
+
+    tickets = QueueTicket.objects.filter(
+        status="done",
+        created_at__year=selected_year,
+        created_at__month=selected_month,
+    )
+
+    if selected_day:
+        tickets = tickets.filter(created_at__day=int(selected_day))
+
+    # faqat shu oy/kunda ishlagan operatorlar
+    active_users = CustomUser.objects.filter(
+        id__in=tickets.values_list("served_by", flat=True).distinct()
+    )
+
+    staff_stats = []
+    for user in active_users:
+        user_tickets = tickets.filter(served_by=user)
+
+        staff_stats.append({
+            "user": user,
+            "role": user.role_title(),
+            "department": user.department_name or "-",
+            "position": user.staff_position or "-",
+            "today": user_tickets.filter(created_at__date=today).count(),
+            "this_month": user_tickets.count(),
+            "total": QueueTicket.objects.filter(served_by=user, status="done").count(),
+            "level": getattr(getattr(user, "operatorprofile", None), "level", "—"),
+        })
+
+    # 🔢 Oydagi kunlar ro‘yxati
+    days_in_month = range(1, calendar.monthrange(selected_year, selected_month)[1] + 1)
+
+    context = {
+        "staff_stats": staff_stats,
+        "selected_year": selected_year,
+        "selected_month": selected_month,
+        "selected_day": selected_day,
+        "days_in_month": days_in_month,
+        "years": range(today.year - 5, today.year + 1),
+        "months": list(enumerate(calendar.month_name))[1:],
+    }
+    return render(request, "queueing/statistics_display.html", context)

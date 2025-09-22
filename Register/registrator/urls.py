@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import service_dashboard, delete_section, delete_subservice, delete_assignment, operator_queue_view, \
     serve_ticket, complete_ticket, cancel_ticket, ajax_waiting_tickets, ajax_serving_ticket, ajax_done_tickets, \
-    dashboard, set_daily_window
+    dashboard, set_daily_window, statistics_display_view
 
 urlpatterns = [
     path('', dashboard, name='service-dashboard'),
@@ -17,4 +17,7 @@ urlpatterns = [
     path('ajax/waiting-tickets/', ajax_waiting_tickets, name='ajax-waiting-tickets'),
     path('ajax/serving-ticket/', ajax_serving_ticket, name='ajax-serving-ticket'),
     path("ajax/done-tickets/", ajax_done_tickets, name="ajax-done-tickets"),
+
+    # ✅ yangi qo‘shilgan URL
+    path('statistics/', statistics_display_view, name='statistics-display'),
 ]

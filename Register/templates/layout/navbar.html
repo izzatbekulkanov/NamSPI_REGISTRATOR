@@ -65,7 +65,7 @@
 
                 <!-- Navbatlar -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle {% if current == 'queue-display' or current == 'operator-queue' %}active{% endif %}"
+                    <a class="nav-link dropdown-toggle {% if current == 'queue-display' or current == 'operator-queue' or current == 'statistics-display' %}active{% endif %}"
                        href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-list-check me-1"></i>Navbatlar
                     </a>
@@ -77,6 +77,11 @@
                         <li>
                             <a class="dropdown-item {% if current == 'operator-queue' %}active{% endif %}"
                                href="{% url 'operator-queue' %}">Operator Navbati</a>
+                        </li>
+                        <!-- ✅ yangi qo‘shilgan -->
+                        <li>
+                            <a class="dropdown-item {% if current == 'statistics-display' %}active{% endif %}"
+                               href="{% url 'statistics-display' %}">Ma'lumotlar</a>
                         </li>
                     </ul>
                 </li>
