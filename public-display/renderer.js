@@ -1,4 +1,4 @@
-const API_URL = "https://webtest.namspi.uz/api/tickets/serving/";
+const API_URL = "https://navbat.namspi.uz/api/tickets/serving/";
 
 // Oldingi navbatlar ro‘yxatini saqlash
 let previousTickets = [];
